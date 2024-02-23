@@ -11,15 +11,11 @@
 
 🌟 Considering the characteristics of multivariate time series, FOCformer takes local causal correlation among time series into account by fractional-oreder calculas and make a improvement in predicting.
 
-<p align="center">
-<img src="./figures/CausalAttention.png"  alt="" align=center />
-</p>
 
 😊 **FOCformer** is repurposed on the iTransformer. We think Transformer has got too much attention in the research area of time series. Hopefully, the mainstream work in the following can focus more on the insight of dataset and consider the essence of Transformer.
 
 
-
-# Overall Architecture
+## Overall Architecture
 
 FOCformer regards **independent time series as variate tokens** to **capture local causal correlations by fractional-order causal attention** and **utilize trend change prompt to learn series overall information**.
 
@@ -27,7 +23,15 @@ FOCformer regards **independent time series as variate tokens** to **capture loc
 <img src="./figures/Architecture.png" alt="" align=center />
 </p>
 
+### FOC Attention
+<p align="center">
+<img src="./figures/CausalAttention.png"  alt="" align=center />
+</p>
 
+### Trend Change Prompt (TCP)
+<p align="center">
+<img src="./figures/Trend_Change_Prompt.png"  alt="" align=center />
+</p>
 
 ## Usage 
 

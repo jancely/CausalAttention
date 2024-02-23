@@ -7,7 +7,7 @@
 
 > **[Adopt Causal Attention](scripts/model_efficiency/README.md)**: Fractional-order causal attention mechanisms is developed to enhence the local correlation on high-dimensional time series.
  
-
+# Updates
 ## Introduction
 
 🌟 Considering the characteristics of multivariate time series, FOCformer takes local causal correlation among time series into account by fractional-oreder calculas and make a improvement in predicting.

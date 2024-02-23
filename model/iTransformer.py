@@ -2,15 +2,18 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from layers.Transformer_EncDec import Encoder, EncoderLayer
-# from layers.SelfAttention_Family import FullAttention
-from layers.CasualAttention import CasualAttention, AttentionLayer
+from layers.SelfAttention_Family import FullAttention, AttentionLayer
+# from layers.CasualAttention import AttentionLayer, CasualAttention
 from layers.CasualAttention import torch_diff
 from layers.Embed import DataEmbedding_inverted
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 class Model(nn.Module):
+    """
+    Paper link: https://arxiv.org/abs/2310.06625
+    """
+
     def __init__(self, configs):
         super(Model, self).__init__()
         self.seq_len = configs.seq_len
@@ -23,28 +26,11 @@ class Model(nn.Module):
                                                     configs.dropout)
         self.class_strategy = configs.class_strategy
         # Encoder-only architecture
-        # if configs.order == 0.0:
-        #     self.encoder = Encoder(
-        #         [
-        #             EncoderLayer(
-        #                 AttentionLayer(
-        #                     FullAttention(False, configs.factor, configs.order, attention_dropout=configs.dropout,
-        #                                     output_attention=configs.output_attention), configs.d_model,
-        #                     configs.n_heads),
-        #                 configs.d_model,
-        #                 configs.d_ff,
-        #                 dropout=configs.dropout,
-        #                 activation=configs.activation
-        #             ) for l in range(configs.e_layers)
-        #         ],
-        #         norm_layer=torch.nn.LayerNorm(configs.d_model)
-        #     )
-        # else:
         self.encoder = Encoder(
             [
                 EncoderLayer(
                     AttentionLayer(
-                        CasualAttention(False, configs.factor, configs.order, attention_dropout=configs.dropout,
+                        FullAttention(False, configs.factor, configs.order, attention_dropout=configs.dropout,
                                       output_attention=configs.output_attention), configs.d_model, configs.n_heads),
                     configs.d_model,
                     configs.d_ff,
@@ -68,7 +54,6 @@ class Model(nn.Module):
         # B: batch_size;    E: d_model; 
         # L: seq_len;       S: pred_len;
         # N: number of variate (tokens), can also includes covariates
-        x_enc = self.diff * torch.diff(torch.cat((x_enc, x_enc[:, :1, :]), dim=1), dim=1, n=1) + (1 - self.diff) * x_enc
 
         # Embedding
         # B L N -> B N E                (B L N -> B L E in the vanilla Transformer)
@@ -77,7 +62,6 @@ class Model(nn.Module):
         # B N E -> B N E                (B L E -> B L E in the vanilla Transformer)
         # the dimensions of embedded time series has been inverted, and then processed by native attn, layernorm and ffn modules
         enc_out, attns = self.encoder(enc_out, attn_mask=None)
-
 
         # B N E -> B N S -> B S N 
         dec_out = self.projector(enc_out).permute(0, 2, 1)[:, :, :N] # filter the covariates
